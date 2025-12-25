@@ -35,6 +35,7 @@ def register_user():
         print("User registered successfully.")
     except:
         print("username already exists")
+        return register_user()
 
 
 
