@@ -10,11 +10,12 @@ CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
     password TEXT,
-    role TEXT
+    role TEXT,
+    phone TEXT
 )
 ''')
 
-cursor.execute('alter table users add column phone text')
+#cursor.execute('alter table users add column phone text')
 
 #default admin user
 cursor.execute('''
@@ -41,6 +42,18 @@ def register_user():
         return register_user()
 
 # login 
+def login():
+    username = input ("enter username: ")
+    password = input ("enter password: ")
+
+    cursor.execute('''
+                   select * from users
+                   where username = ? and password = ?
+                     ''', (username, password))
+    user = cursor.fetchone()
+    if user:
+        print("Login successful.")
+        return user
 
 
 #menu table
@@ -74,12 +87,21 @@ conn.commit()
 while True:
     print("\nRestaurant Management System")
     print("1. Register (User)")
+    print("2. Login")
 
 
     choice = input("Choice: ")
 
     if choice == "1":
         register_user()
+    elif choice == "2":
+        user = login()
+        if user:
+            user_id, username, password, role, phone = user
+            if role == "admin":
+                print("Admin functionalities can be implemented here.")
+            else:
+                print("Customer functionalities can be implemented here.")
     else:
         print("Invalid choice. Please try again.")
 
