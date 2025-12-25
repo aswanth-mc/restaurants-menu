@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
 )
 ''')
 
+cursor.execute('alter table users add column phone text')
+
 #default admin user
 cursor.execute('''
 INSERT OR IGNORE INTO users (username, password, role)
@@ -21,22 +23,24 @@ VALUES ('admin', 'admin123', 'admin')
 ''')
 conn.commit()
 
-#function to register a new user
+# register a new user
 def register_user():
     username = input("Enter username: ")
     password = input("Enter password: ")
+    phone = input("Enter phone number: ")
 
     try:
         cursor.execute('''
-        INSERT INTO users (username, password, role)
-        VALUES (?, ?, 'customer')
-        ''', (username, password))
+        INSERT INTO users (username, password, role, phone)
+        VALUES (?, ?, 'customer', ?)
+        ''', (username, password, phone))
         conn.commit()
         print("User registered successfully.")
     except:
         print("username already exists")
         return register_user()
 
+# login 
 
 
 #menu table
@@ -47,6 +51,8 @@ CREATE TABLE IF NOT EXISTS menu (
     price REAL
 )
 ''')
+
+
 #orders table
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS orders (
