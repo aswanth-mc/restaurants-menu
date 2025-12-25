@@ -13,6 +13,26 @@ CREATE TABLE IF NOT EXISTS users (
     role TEXT
 )
 ''')
+
+#default admin user
+cursor.execute('''
+INSERT OR IGNORE INTO users (username, password, role)
+VALUES ('admin', 'admin123', 'admin')
+''')
+conn.commit()
+
+#function to register a new user
+def register_user():
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+    cursor.execute(
+        "INSERT INTO users (username, password, role) VALUES (?, ?, 'user')",
+        (username, password)
+    )
+    conn.commit()
+    print("User registered successfully")
+
+
 #menu table
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS menu (
@@ -35,21 +55,8 @@ CREATE TABLE IF NOT EXISTS orders (
 ''')
 conn.commit()
 
-cursor.execute('''
-INSERT OR IGNORE INTO users (username, password, role)
-VALUES ('admin', 'admin123', 'admin')
-''')
-conn.commit()
 
-def register_user():
-    username = input("Enter username: ")
-    password = input("Enter password: ")
-    cursor.execute(
-        "INSERT INTO users (username, password, role) VALUES (?, ?, 'user')",
-        (username, password)
-    )
-    conn.commit()
-    print("User registered successfully")
+
 
 
 while True:
