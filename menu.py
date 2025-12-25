@@ -25,12 +25,17 @@ conn.commit()
 def register_user():
     username = input("Enter username: ")
     password = input("Enter password: ")
-    cursor.execute(
-        "INSERT INTO users (username, password, role) VALUES (?, ?, 'user')",
-        (username, password)
-    )
-    conn.commit()
-    print("User registered successfully")
+
+    try:
+        cursor.execute('''
+        INSERT INTO users (username, password, role)
+        VALUES (?, ?, 'customer')
+        ''', (username, password))
+        conn.commit()
+        print("User registered successfully.")
+    except:
+        print("username already exists")
+
 
 
 #menu table
