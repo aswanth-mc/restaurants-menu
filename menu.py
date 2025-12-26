@@ -43,13 +43,13 @@ def register_user():
 
 # login 
 def login():
-    username = input ("enter username: ")
+    phno = input ("enter phone number: ")
     password = input ("enter password: ")
 
     cursor.execute('''
                    select * from users
-                   where username = ? and password = ?
-                     ''', (username, password))
+                   where phone = ? and password = ?
+                     ''', (phno, password))
     user = cursor.fetchone()
     if user:
         print("Login successful.")
@@ -80,6 +80,8 @@ CREATE TABLE IF NOT EXISTS orders (
 ''')
 conn.commit()
 
+#place order
+
 
 
 
@@ -101,7 +103,7 @@ while True:
             if role == "admin":
                 print("Admin functionalities can be implemented here.")
             else:
-                print("Customer functionalities can be implemented here.")
+                print(f"Customer functionalities can be implemented here {username}.")
     else:
         print("Invalid choice. Please try again.")
 
