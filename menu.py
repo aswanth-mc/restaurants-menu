@@ -42,9 +42,10 @@ def login():
     if user:
         username,role = user
         if role == 'manager':
-            print(f"welcome manager {username}")
+            print(f"\nwelcome manager {username}")
         elif role == 'cheif':
             print(f"welcome cheif {username}")
+            chef()
         elif role == 'waiter':
             print(f"welcome waiter {username}")
         else:
@@ -74,6 +75,22 @@ def add_menu():
     values (?, ?, ?, ?)''', (item_name, category, price, availability))
     conn.commit()
     print("menu item added successfully")
+
+
+
+# chef fuction
+def chef():
+    while True:
+        print("1.add menu item")
+        print("0.logout")
+
+        choice = input("enter your choice: ")
+        if choice == "1":
+            add_menu()
+        elif choice == "0":
+            break
+        else:
+            print("invalid choice, please try again.")
 
 
 while True:
