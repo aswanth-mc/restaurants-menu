@@ -15,19 +15,19 @@ create table if not exists users (
 
 # manager insertion
 cursor.execute('''
-insert into users (username, password, phone, role)
+INSERT OR IGNORE INTO users (username, password, phone, role)
 values ('manager1', 'man123', '1111111111', 'manager')
 ''')
 
 #cheif insertion
 cursor.execute('''
-insert into users (username, password, phone, role)
+INSERT OR IGNORE INTO users (username, password, phone, role)
 values ('cheif1', 'cheif123', '2222222222', 'cheif')
 ''')
 
 #waiter insertion
 cursor.execute('''
-insert into users (username, password, phone, role)
+INSERT OR IGNORE INTO users (username, password, phone, role)
 values ('waiter1', 'waiter123', '3333333333', 'waiter')
 ''')
 
@@ -40,7 +40,7 @@ def login():
     user = cursor.fetchone()
 
     if user:
-        username,role = user
+        username,role, = user
         if role == 'manager':
             print(f"\nwelcome manager {username}")
         elif role == 'cheif':
@@ -105,6 +105,8 @@ def view_menu():
         availability_status = "Available" if availability == 1 else "Not Available"
         print(f"ID: {id}, Name: {item_name}, Category: {category}, Price: {price}, Availability: {availability_status}")
 
+
+
 # chef function
 def cheif():
     while True:
@@ -146,7 +148,7 @@ while True:
     choice = input("enter your choice: ")
 
     if choice == "1":
-        print("user registration")
+        customer_registration()
     elif choice == "2":
         login()
     elif choice == "0":
