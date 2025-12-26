@@ -12,3 +12,18 @@ create table if not exists users (
                role text not null )
                ''')
 
+
+while True:
+    print("\nWelcome to the Restaurant Menu Management System")
+    print("1. user registration")
+    print("0. Exit")
+
+    choice = input("enter your choice: ")
+
+    if choice == "1":
+        print("user registration")
+    elif choice == "0":
+        break
+    else:
+        print("invalid choice, please try again.")
+conn.close()
