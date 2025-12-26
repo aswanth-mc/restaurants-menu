@@ -10,8 +10,10 @@ create table if not exists users (
                username text not null,
                password text not null,
                phone text unique not null,
-               role text not null )
+               role text not null,
+               points integer default 0)
                ''')
+
 
 # manager insertion
 cursor.execute('''
@@ -69,6 +71,20 @@ def customer_registration():
     
     except:
         print("registration failed, phone number may already exist")
+    
+    #customer points view
+def view_points(customer_id):
+    cursor.execute('''
+    SELECT points FROM users WHERE id = ?
+    ''', (customer_id,))
+    
+    result = cursor.fetchone()
+    
+    if result:
+        print(f"Your total points: {result[0]}")
+    else:
+        print("Unable to fetch points")
+   
 
 #menu table
 cursor.execute('''
@@ -125,7 +141,9 @@ def place_order(customer_id):
     insert into orders (customer_id, menu_item_id, quantity, table_number)
     values (?, ?, ?, ?)
     ''', (customer_id, menu_item_id, quantity, table_number))
-
+    cursor.execute('''
+    UPDATE users SET points = points + 10 WHERE id = ?
+    ''', (customer_id,))
     conn.commit()
     print("Order placed successfully")
 
@@ -147,7 +165,8 @@ def view_orders():
 # chef function
 def cheif():
     while True:
-        print("\n1.add menu item")
+        print("\nCheif Menu")
+        print("1.add menu item")
         print("2.view menu")
         print("3.view orders")
         print("0.logout")
@@ -167,8 +186,10 @@ def cheif():
 # customer function
 def customer(customer_id):
     while True:
-        print("\n1. View Menu")
+        print("\nCustomer Menu")
+        print("1. View Menu")
         print("2. Place Order")
+        print("3. View Points")
         print("0. Logout")
 
         choice = input("enter your choice: ")
@@ -177,6 +198,8 @@ def customer(customer_id):
             view_menu()
         elif choice == "2":
             place_order(customer_id)
+        elif choice == "3":
+            view_points(customer_id)
         elif choice == "0":
             break
         else:
