@@ -52,6 +52,30 @@ def login():
     else:
         print("invalid phone number or password")
 
+#menu table
+cursor.execute('''
+               create table if not exists menu (
+               id integer primary key autoincrement,
+                item_name text not null,
+               category text not null,
+               price real not null ,
+                availability integer not null default 1)
+                ''')
+
+# menu adding function
+def add_menu():
+    item_name = input("enter item name: ")
+    category = input("enter category: ")
+    price = float(input("enter price: "))
+    availability = int(input("enter availability (1 for available, 0 for not available): "))
+
+    cursor.execute('''
+    insert into menu (item_name, category, price, availability)
+    values (?, ?, ?, ?)''', (item_name, category, price, availability))
+    conn.commit()
+    print("menu item added successfully")
+
+
 while True:
     print("\nWelcome to the Restaurant Menu Management System")
     print("1. user registration")
