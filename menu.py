@@ -190,6 +190,7 @@ def customer(customer_id):
         print("1. View Menu")
         print("2. Place Order")
         print("3. View Points")
+        print("4. View Bill")
         print("0. Logout")
 
         choice = input("enter your choice: ")
@@ -200,10 +201,47 @@ def customer(customer_id):
             place_order(customer_id)
         elif choice == "3":
             view_points(customer_id)
+        elif choice == "4":
+            view_bill(customer_id)
         elif choice == "0":
             break
         else:
             print("invalid choice")
+
+#bill function
+def view_bill(customer_id):
+    cursor.execute('''
+    SELECT 
+        u.username,
+        o.table_number,
+        m.item_name,
+        m.price,
+        o.quantity,
+        (m.price * o.quantity) AS item_total
+    FROM orders o
+    JOIN users u ON o.customer_id = u.id
+    JOIN menu m ON o.menu_item_id = m.id
+    WHERE o.customer_id = ?
+    ''', (customer_id,))
+
+    rows = cursor.fetchall()
+
+    if not rows:
+        print("No orders found.")
+        return
+
+    print("\n----- BILL -----")
+    total_amount = 0
+
+    for row in rows:
+        username, table_number, item_name, price, quantity, item_total = row
+        total_amount += item_total
+        print(f"{item_name} | {quantity} x {price} = {item_total}")
+
+   
+    print(f"Customer     : {username}")
+    print(f"TOTAL AMOUNT : {total_amount}")
+
 
 
 # main
