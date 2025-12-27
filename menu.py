@@ -45,8 +45,7 @@ INSERT OR IGNORE INTO users (username, password, phone, role)
 values ('manager1', 'man123', '1111111111', 'manager')
 ''')
 
-
-
+# login function
 def login():
     phone = input ("enter phone number: ")
     password = input("enter password: ")
@@ -59,6 +58,7 @@ def login():
         id,username,role = user
         if role == 'manager':
             print(f"\nwelcome manager {username}")
+            manager()
         elif role == 'cheif':
             print(f"\nwelcome cheif {username}")
             cheif()
@@ -69,6 +69,52 @@ def login():
             customer(id)
     else:
         print("invalid phone number or password")
+
+
+# manager function
+def manager():
+        while True:
+            print("\nManager Menu")
+            print("1. View Menu")
+            print("2. View Orders")
+            print("3.add staff")
+            print("0. Logout")
+
+            choice = input("enter your choice: ")
+            if choice == "1":
+                view_menu()
+            elif choice == "2":
+                view_orders()
+            elif choice == "3":
+                add_staff()
+            elif choice == "0":
+                break
+            else:
+                print("invalid choice, please try again.")
+
+
+# add staff function
+def add_staff():
+    try:
+        username = input("enter staff username: ")
+        password = input("enter staff password: ")
+        phone = input("enter staff phone number: ")
+        role = input("enter staff role (cheif/waiter): ")
+ 
+        if role not in ['cheif', 'waiter']:
+            print("invalid role, must be 'cheif' or 'waiter'")
+            return
+        if not username or not password or not phone:
+            print("all fields are required")
+            return
+        
+        cursor.execute('''
+        insert into users (username, password, phone, role)
+        values (?, ?, ?, ?)''', (username, password, phone, role))
+        conn.commit()
+        print("staff added successfully")
+    except:
+        print("failed to add staff, phone number may already exist")
 
 # customer registration
 def customer_registration():
