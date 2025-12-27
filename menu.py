@@ -214,9 +214,8 @@ def view_orders():
     orders = cursor.fetchall()
 
     print("\nOrders:")
-    for order in orders:
-        id, username, item_name, quantity, table_number = order
-        print(f" Item: {item_name}, Quantity: {quantity}, Table Number: {table_number}")
+    headers = ["id", "username", "item_name", "quantity", "table_number"]
+    print(tabulate(orders, headers, tablefmt="grid"))
 
 # chef function
 def cheif():
