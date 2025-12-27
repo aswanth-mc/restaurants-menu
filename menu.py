@@ -1,4 +1,5 @@
 import sqlite3
+from tabulate import tabulate
 
 conn = sqlite3.connect('restaurants.db')
 cursor = conn.cursor()
@@ -106,14 +107,12 @@ def add_menu():
 # view menu function
 def view_menu():
     cursor.execute('''
-    select id, item_name, category, price, availability from menu''')
+    select id, item_name, category, pricey from menu''')
     menu_items = cursor.fetchall()
 
     print("\nMenu Items:")
-    for item in menu_items:
-        id, item_name, category, price, availability = item
-        availability_status = "Available" if availability == 1 else "Not Available"
-        print(f"ID: {id}, Name: {item_name}, Category: {category}, Price: {price}, Availability: {availability_status}")
+    headers = ["id", "item_name", "category", "price"]
+    print(tabulate(menu_items, headers, tablefmt="grid"))
 
 #order table
 cursor.execute('''
