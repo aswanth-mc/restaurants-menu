@@ -150,6 +150,8 @@ def cheif():
             view_menu()
         elif choice == "3":
             view_orders()
+        elif choice == "4":
+            update_menu_item_availbility()
         elif choice == "0":
             break
         else:
