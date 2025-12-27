@@ -147,7 +147,7 @@ def cheif():
         if choice == "1":
             add_menu()
         elif choice == "2":
-            view_menu()
+            view_menu_available()
         elif choice == "3":
             view_orders()
         elif choice == "4":
@@ -159,16 +159,34 @@ def cheif():
 
 # menu adding function
 def add_menu():
-    item_name = input("enter item name: ")
-    category = input("enter category: ")
-    price = float(input("enter price: "))
-    availability = int(input("enter availability (1 for available, 0 for not available): "))
+    while True:
+        item_name = input("enter item name: ")
+        category = input("enter category: ")
+        price = float(input("enter price: "))
+        availability = int(input("enter availability (1 for available, 0 for not available): "))
+        cursor.execute('''
+        insert into menu (item_name, category, price, availability)
+        values (?, ?, ?, ?)''', (item_name, category, price, availability))
+        conn.commit()
+        print("menu item added successfully")
 
+        choice = input("do you want to add another item? (y/n): ").lower()
+        if choice != 'y':
+            break
+
+def view_menu_available():
     cursor.execute('''
-    insert into menu (item_name, category, price, availability)
-    values (?, ?, ?, ?)''', (item_name, category, price, availability))
-    conn.commit()
-    print("menu item added successfully")
+    select id, item_name, category, price, availability from menu''')
+    menu_items = cursor.fetchall()
+
+    formated_items = []
+    for item in menu_items:
+        availability_status = 'Available' if item[4] == 1 else 'Not Available'
+        formated_items.append((item[0], item[1], item[2], item[3], availability_status))
+
+    print("\nMenu Items:")
+    headers = ["id", "item_name", "category", "price", "availability"]
+    print(tabulate(menu_items, headers, tablefmt="grid"))
 
 #update_menu_item_availbility
 def update_menu_item_availbility():
@@ -242,7 +260,7 @@ def customer_registration():
 # view menu 
 def view_menu():
     cursor.execute('''
-    select id, item_name, category, pricey from menu''')
+    select id, item_name, category, price from menu''')
     menu_items = cursor.fetchall()
 
     print("\nMenu Items:")
