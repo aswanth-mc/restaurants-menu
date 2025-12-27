@@ -74,19 +74,22 @@ def login():
 # manager function
 def manager():
         while True:
-            print("\nManager Menu")
+            print("\nManager Menu\n")
             print("1. View Menu")
             print("2. View Orders")
             print("3.add staff")
+            print("4.view staff")
             print("0. Logout")
 
-            choice = input("enter your choice: ")
+            choice = input("\nenter your choice: ")
             if choice == "1":
                 view_menu()
             elif choice == "2":
                 view_orders()
             elif choice == "3":
                 add_staff()
+            elif choice == "4":
+                view_staff()
             elif choice == "0":
                 break
             else:
@@ -96,10 +99,10 @@ def manager():
 # add staff function
 def add_staff():
     try:
-        username = input("enter staff username: ")
-        password = input("enter staff password: ")
-        phone = input("enter staff phone number: ")
-        role = input("enter staff role (cheif/waiter): ")
+        username = input("enter staff username: ").strip()
+        password = input("enter staff password: ").strip()
+        phone = input("enter staff phone number: ").strip()
+        role = input("enter staff role (cheif/waiter): ").strip().lower()
  
         if role not in ['cheif', 'waiter']:
             print("invalid role, must be 'cheif' or 'waiter'")
@@ -115,6 +118,17 @@ def add_staff():
         print("staff added successfully")
     except:
         print("failed to add staff, phone number may already exist")
+
+#view staff function
+def view_staff():
+    cursor.execute('''
+    select id, username, phone, role from users where role in ('cheif', 'waiter')
+    ''')
+    staff_members = cursor.fetchall()
+
+    print("\nStaff Members:")
+    headers = ["id", "username", "phone", "role"]
+    print(tabulate(staff_members, headers, tablefmt="grid"))
 
 # customer registration
 def customer_registration():
