@@ -115,7 +115,7 @@ def add_staff():
         insert into users (username, password, phone, role)
         values (?, ?, ?, ?)''', (username, password, phone, role))
         conn.commit()
-        print("staff added successfully")
+        print("\nstaff added successfully")
     except:
         print("failed to add staff, phone number may already exist")
 
