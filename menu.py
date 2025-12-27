@@ -3,6 +3,7 @@ import sqlite3
 conn = sqlite3.connect('restaurants.db')
 cursor = conn.cursor()
 
+
 #user table
 cursor.execute('''
 create table if not exists users (
@@ -13,6 +14,7 @@ create table if not exists users (
                role text not null,
                points integer default 0)
                ''')
+
 
 
 # manager insertion
@@ -86,15 +88,7 @@ def view_points(customer_id):
         print("Unable to fetch points")
    
 
-#menu table
-cursor.execute('''
-               create table if not exists menu (
-               id integer primary key autoincrement,
-                item_name text not null,
-               category text not null,
-               price real not null ,
-                availability integer not null default 1)
-                ''')
+
 
 # menu adding function
 def add_menu():
