@@ -130,37 +130,30 @@ def view_staff():
     headers = ["id", "username", "phone", "role"]
     print(tabulate(staff_members, headers, tablefmt="grid"))
 
-# customer registration
-def customer_registration():
-    try:
-        username = input("enter username: ")
-        password = input("enter password: ")
-        phone = input("enter phone number: ")
 
-        cursor.execute('''
-        insert into users (username, password, phone, role)
-        values (?, ?, ?, 'customer')''', (username, password, phone))
-        conn.commit()
-        print("registration successful")
-    
-    except:
-        print("registration failed, phone number may already exist")
-    
-    #customer points view
-def view_points(customer_id):
-    cursor.execute('''
-    SELECT points FROM users WHERE id = ?
-    ''', (customer_id,))
-    
-    result = cursor.fetchone()
-    
-    if result:
-        print(f"Your total points: {result[0]}")
-    else:
-        print("Unable to fetch points")
-   
+#-----------------------------------------------------------------------------------------------   
 
+# chef function
+def cheif():
+    while True:
+        print("\nCheif Menu")
+        print("1.add menu item")
+        print("2.view menu")
+        print("3.view orders")
+        print("4.update menu")
+        print("0.logout")
 
+        choice = input("enter your choice: ")
+        if choice == "1":
+            add_menu()
+        elif choice == "2":
+            view_menu()
+        elif choice == "3":
+            view_orders()
+        elif choice == "0":
+            break
+        else:
+            print("invalid choice, please try again.")
 
 # menu adding function
 def add_menu():
@@ -175,33 +168,17 @@ def add_menu():
     conn.commit()
     print("menu item added successfully")
 
-# view menu function
-def view_menu():
-    cursor.execute('''
-    select id, item_name, category, pricey from menu''')
-    menu_items = cursor.fetchall()
-
-    print("\nMenu Items:")
-    headers = ["id", "item_name", "category", "price"]
-    print(tabulate(menu_items, headers, tablefmt="grid"))
-
-
-
-# order placeing
-def place_order(customer_id):
-    menu_item_id = int(input("Enter menu item id: "))
-    quantity = int(input("Enter quantity: "))
-    table_number = int(input("Enter table number: "))
-
-    cursor.execute('''
-    insert into orders (customer_id, menu_item_id, quantity, table_number)
-    values (?, ?, ?, ?)
-    ''', (customer_id, menu_item_id, quantity, table_number))
-    cursor.execute('''
-    UPDATE users SET points = points + 10 WHERE id = ?
-    ''', (customer_id,))
-    conn.commit()
-    print("Order placed successfully")
+#update_menu_item_availbility
+def update_menu_item_availbility():
+    try:
+        item_id = int(input("enter item id : "))
+        availability = int(input("enter new availability (1 for available, 0 for not available): "))
+        cursor.execute('''
+        update menu set availability = ? where id = ?''', (availability, item_id))
+        conn.commit()
+        print("menu item availability updated successfully")
+    except :
+        print("failed to update menu item availability: ")
 
 #view order
 def view_orders():
@@ -217,26 +194,7 @@ def view_orders():
     headers = ["id", "username", "item_name", "quantity", "table_number"]
     print(tabulate(orders, headers, tablefmt="grid"))
 
-# chef function
-def cheif():
-    while True:
-        print("\nCheif Menu")
-        print("1.add menu item")
-        print("2.view menu")
-        print("3.view orders")
-        print("0.logout")
-
-        choice = input("enter your choice: ")
-        if choice == "1":
-            add_menu()
-        elif choice == "2":
-            view_menu()
-        elif choice == "3":
-            view_orders()
-        elif choice == "0":
-            break
-        else:
-            print("invalid choice, please try again.")
+#-----------------------------------------------------------------------------------------------
 
 # customer function
 def customer(customer_id):
@@ -262,6 +220,61 @@ def customer(customer_id):
             break
         else:
             print("invalid choice")
+
+# customer registration
+def customer_registration():
+    try:
+        username = input("enter username: ")
+        password = input("enter password: ")
+        phone = input("enter phone number: ")
+
+        cursor.execute('''
+        insert into users (username, password, phone, role)
+        values (?, ?, ?, 'customer')''', (username, password, phone))
+        conn.commit()
+        print("registration successful")
+    
+    except:
+        print("registration failed, phone number may already exist")
+
+# view menu 
+def view_menu():
+    cursor.execute('''
+    select id, item_name, category, pricey from menu''')
+    menu_items = cursor.fetchall()
+
+    print("\nMenu Items:")
+    headers = ["id", "item_name", "category", "price"]
+    print(tabulate(menu_items, headers, tablefmt="grid"))
+
+# order placeing
+def place_order(customer_id):
+    menu_item_id = int(input("Enter menu item id: "))
+    quantity = int(input("Enter quantity: "))
+    table_number = int(input("Enter table number: "))
+
+    cursor.execute('''
+    insert into orders (customer_id, menu_item_id, quantity, table_number)
+    values (?, ?, ?, ?)
+    ''', (customer_id, menu_item_id, quantity, table_number))
+    cursor.execute('''
+    UPDATE users SET points = points + 10 WHERE id = ?
+    ''', (customer_id,))
+    conn.commit()
+    print("Order placed successfully")
+    
+    #customer points view
+def view_points(customer_id):
+    cursor.execute('''
+    SELECT points FROM users WHERE id = ?
+    ''', (customer_id,))
+    
+    result = cursor.fetchone()
+    
+    if result:
+        print(f"Your total points: {result[0]}")
+    else:
+        print("Unable to fetch points")
 
 
 
