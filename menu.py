@@ -1,5 +1,6 @@
 import sqlite3
 from tabulate import tabulate
+from datetime import datetime
 
 conn = sqlite3.connect('restaurants.db')
 cursor = conn.cursor()
@@ -39,6 +40,20 @@ create table if not exists menu (
                price real not null,
                availability integer default 1)
                ''')
+
+#customer feedback
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+    comments TEXT,
+    created_at TEXT,
+    FOREIGN KEY (customer_id) REFERENCES users(id)
+)
+''')
+conn.commit()
+
 
 
 # manager insertion
@@ -81,6 +96,7 @@ def manager():
             print("2. Add staff")
             print("3. View staff")
             print("4. View customers")
+            print("5. View feedback")
             print("0. Logout")
 
             choice = input("\nenter your choice: ")
@@ -92,6 +108,8 @@ def manager():
                 view_staff()
             elif choice == "4":
                 view_customers()
+            elif choice == "5":
+                view_feedback()
             elif choice == "0":
                 break
             else:
@@ -142,6 +160,26 @@ def view_customers():
     print("\nCustomers:")
     headers = ["id", "username", "phone", "points"]
     print(tabulate(customers, headers, tablefmt="grid"))
+
+#view feedback function
+def view_feedback():
+    cursor.execute('''
+    SELECT u.username, u.phone, f.rating, f.comments, f.created_at
+    FROM feedback f
+    JOIN users u ON f.customer_id = u.id
+    ORDER BY f.created_at DESC
+    ''')
+    
+    feedbacks = cursor.fetchall()
+
+    if not feedbacks:
+        print("No feedback available.")
+        return
+
+    headers = ["Customer Name", "Phone", "Rating", "Feedback", "Date"]
+    print("\nCustomer Feedback:")
+    print(tabulate(feedbacks, headers, tablefmt="grid"))
+
 
 
 #-----------------------------------------------------------------------------------------------   
@@ -242,6 +280,7 @@ def customer(customer_id):
         print("4. View order")
         print("5. view Bill")
         print("6. Pay Bill")
+        Print("7. Add Feedback")
         print("0. Logout")
 
         choice = input("\nenter your choice: ")
@@ -258,6 +297,8 @@ def customer(customer_id):
             generate_bill(customer_id)
         elif choice == "6":
             pay_bill(customer_id)
+        elif choice == "7":
+            add_feedback(customer_id)
         elif choice == "0":
             break
         else:
@@ -394,6 +435,28 @@ def pay_bill(customer_id):
     conn.commit()
     print(f"Payment successful via {payment_mode}.")
     print("Orders marked as billed.")
+
+# feedback function
+def add_feedback(customer_id):
+    try:
+        rating = int(input("Rate our service (1 to 5): "))
+        if rating < 1 or rating > 5:
+            print("Rating must be between 1 and 5")
+            return
+
+        comments = input("Enter your feedback: ").strip()
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        cursor.execute('''
+        INSERT INTO feedback (customer_id, rating, comments, created_at)
+        VALUES (?, ?, ?, ?)
+        ''', (customer_id, rating, comments, created_at))
+
+        conn.commit()
+        print("Thank you for your feedback!")
+
+    except ValueError:
+        print("Invalid input")
 
 
 
