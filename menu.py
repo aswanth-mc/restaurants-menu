@@ -104,10 +104,10 @@ def add_staff():
         username = input("enter staff username: ").strip()
         password = input("enter staff password: ").strip()
         phone = input("enter staff phone number: ").strip()
-        role = input("enter staff role (chef/waiter/cashier): ").strip().lower()
+        role = input("enter staff role (chef/waiter): ").strip().lower()
 
-        if role not in ['chef', 'waiter', 'cashier']:
-            print("invalid role, must be 'chef', 'waiter', or 'cashier'")
+        if role not in ['chef', 'waiter']:
+            print("invalid role, must be 'chef' or 'waiter'")
             return
         if not username or not password or not phone:
             print("all fields are required")
