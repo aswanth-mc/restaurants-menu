@@ -179,14 +179,14 @@ def view_menu_available():
     select id, item_name, category, price, availability from menu''')
     menu_items = cursor.fetchall()
 
-    formated_items = []
+    formatted_items = []
     for item in menu_items:
         availability_status = 'Available' if item[4] == 1 else 'Not Available'
-        formated_items.append((item[0], item[1], item[2], item[3], availability_status))
+        formatted_items.append((item[0], item[1], item[2], item[3], availability_status))
 
     print("\nMenu Items:")
     headers = ["id", "item_name", "category", "price", "availability"]
-    print(tabulate(menu_items, headers, tablefmt="grid"))
+    print(tabulate(formatted_items, headers, tablefmt="grid"))
 
 #update_menu_item_availbility
 def update_menu_item_availbility():
