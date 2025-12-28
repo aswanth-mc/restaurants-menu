@@ -283,7 +283,7 @@ def place_order(customer_id):
     conn.commit()
     print("Order placed successfully")
     
-    #customer points view
+#customer points view
 def view_points(customer_id):
     cursor.execute('''
     SELECT points FROM users WHERE id = ?
@@ -296,8 +296,7 @@ def view_points(customer_id):
     else:
         print("Unable to fetch points")
 
-
-
+#----------main--------------------------------------------------------------
 # main
 while True:
     print("\nWelcome to the Restaurant Menu Management System")
