@@ -76,19 +76,17 @@ def manager():
         while True:
             print("\nManager Menu\n")
             print("1. View Menu")
-            print("2. View Orders")
-            print("3.add staff")
-            print("4.view staff")
+            print("2. Add staff")
+            print("3. View staff")
+            print("4. View customers")
             print("0. Logout")
 
             choice = input("\nenter your choice: ")
             if choice == "1":
                 view_menu()
             elif choice == "2":
-                view_orders()
-            elif choice == "3":
                 add_staff()
-            elif choice == "4":
+            elif choice == "3":
                 view_staff()
             elif choice == "0":
                 break
@@ -129,6 +127,17 @@ def view_staff():
     print("\nStaff Members:")
     headers = ["id", "username", "phone", "role"]
     print(tabulate(staff_members, headers, tablefmt="grid"))
+
+#view customers function
+def view_customers():
+    cursor.execute('''
+    select id, username, phone, points from users where role = 'customer'
+    ''')
+    customers = cursor.fetchall()
+
+    print("\nCustomers:")
+    headers = ["id", "username", "phone", "points"]
+    print(tabulate(customers, headers, tablefmt="grid"))
 
 
 #-----------------------------------------------------------------------------------------------   
