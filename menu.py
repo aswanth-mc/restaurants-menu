@@ -24,8 +24,10 @@ cursor.execute('''
                menu_item_id integer not null,
                quantity integer not null,
                table_number integer not null,
+               billed integer default 0,
                foreign key (customer_id) references users(id),
-               foreign key (menu_item_id) references menu(id))  
+               foreign key (menu_item_id) references menu(id))
+                
                ''')
 
 #menu table
@@ -59,9 +61,9 @@ def login():
         if role == 'manager':
             print(f"\nwelcome manager {username}")
             manager()
-        elif role == 'cheif':
-            print(f"\nwelcome cheif {username}")
-            cheif()
+        elif role == 'chef':
+            print(f"\nwelcome chef {username}")
+            chef()
         elif role == 'waiter':
             print(f"\nwelcome waiter {username}")
         else:
@@ -88,6 +90,8 @@ def manager():
                 add_staff()
             elif choice == "3":
                 view_staff()
+            elif choice == "4":
+                view_customers()
             elif choice == "0":
                 break
             else:
@@ -100,10 +104,10 @@ def add_staff():
         username = input("enter staff username: ").strip()
         password = input("enter staff password: ").strip()
         phone = input("enter staff phone number: ").strip()
-        role = input("enter staff role (cheif/waiter): ").strip().lower()
- 
-        if role not in ['cheif', 'waiter']:
-            print("invalid role, must be 'cheif' or 'waiter'")
+        role = input("enter staff role (chef/waiter/cashier): ").strip().lower()
+
+        if role not in ['chef', 'waiter', 'cashier']:
+            print("invalid role, must be 'chef', 'waiter', or 'cashier'")
             return
         if not username or not password or not phone:
             print("all fields are required")
@@ -120,8 +124,8 @@ def add_staff():
 #view staff function
 def view_staff():
     cursor.execute('''
-    select id, username, phone, role from users where role in ('cheif', 'waiter')
-    ''')
+    select id, username, phone, role from users where role in ('chef', 'waiter', 'cashier')
+    ''' )
     staff_members = cursor.fetchall()
 
     print("\nStaff Members:")
@@ -143,9 +147,9 @@ def view_customers():
 #-----------------------------------------------------------------------------------------------   
 
 # chef function
-def cheif():
+def chef():
     while True:
-        print("\nCheif Menu")
+        print("\nChef Menu")
         print("1.add menu item")
         print("2.view menu")
         print("3.view orders")
@@ -223,8 +227,56 @@ def view_orders():
     headers = ["id", "username", "item_name", "quantity", "table_number"]
     print(tabulate(orders, headers, tablefmt="grid"))
 
+
 #-----------------------------------------------------------------------------------------------
 
+# cashier function
+def cashier():
+    while True:
+        print("\nCashier Menu")
+        print("1. View Menu")
+        print("2. View Orders")
+        print("3. Process Customer Payment")
+        print("0. Logout")
+
+        choice = input("enter your choice: ")
+        if choice == "1":
+            view_menu_available()
+        elif choice == "2":
+            view_orders()
+        elif choice == "3":
+            try:
+                cust_id = int(input("Enter customer id to process payment: "))
+                generate_bill(cust_id)
+            except ValueError:
+                print("invalid customer id")
+        elif choice == "0":
+            break
+        else:
+            print("invalid choice, please try again.")
+
+def waiter():
+    while True:
+        print("\nWaiter Menu")
+        print("1. Place Order for Customer")
+        print("2. View Orders")
+        print("0. Logout")
+
+        choice = input("enter your choice: ")
+        if choice == "1":
+            try:
+                cust_id = int(input("Enter customer id: "))
+                place_order(cust_id)
+            except ValueError:
+                print("invalid customer id")
+        elif choice == "2":
+            view_orders()
+        elif choice == "0":
+            break
+        else:
+            print("invalid choice, please try again.")
+
+#----------------------------------------------------------------------------------------------
 # customer function
 def customer(customer_id):
     while True:
@@ -233,6 +285,7 @@ def customer(customer_id):
         print("2. Place Order")
         print("3. View Points")
         print("4. View order")
+        print("5. view Bill")
         print("0. Logout")
 
         choice = input("\nenter your choice: ")
@@ -328,6 +381,9 @@ def view_points(customer_id):
         print(f"Your total points: {result[0]}")
     else:
         print("Unable to fetch points")
+
+
+
 
 #----------main--------------------------------------------------------------
 # main
