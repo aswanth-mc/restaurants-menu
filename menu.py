@@ -219,14 +219,14 @@ def view_orders():
 # customer function
 def customer(customer_id):
     while True:
-        print("\nCustomer Menu")
+        print("\nCustomer Menu\n")
         print("1. View Menu")
         print("2. Place Order")
         print("3. View Points")
-        print("4. View Bill")
+        print("4. View order")
         print("0. Logout")
 
-        choice = input("enter your choice: ")
+        choice = input("\nenter your choice: ")
 
         if choice == "1":
             view_menu()
@@ -235,7 +235,7 @@ def customer(customer_id):
         elif choice == "3":
             view_points(customer_id)
         elif choice == "4":
-            view_bill(customer_id)
+            view_order(customer_id)
         elif choice == "0":
             break
         else:
@@ -269,19 +269,43 @@ def view_menu():
 
 # order placeing
 def place_order(customer_id):
-    menu_item_id = int(input("Enter menu item id: "))
-    quantity = int(input("Enter quantity: "))
-    table_number = int(input("Enter table number: "))
 
+    table_number = int(input("\nEnter table number: "))
+    try:
+        menu_item_id = int(input("Enter menu item id: "))
+        quantity = int(input("Enter quantity: "))
+        cursor.execute('''
+        insert into orders (customer_id, menu_item_id, quantity, table_number)
+        values (?, ?, ?, ?)
+        ''', (customer_id, menu_item_id, quantity, table_number))
+        cursor.execute('''
+        UPDATE users SET points = points + 10 WHERE id = ?
+        ''', (customer_id,))
+        conn.commit()
+        print("\nitem added successfully")
+
+        choice = input("do you want to place another order? (y/n): ").lower()
+        if choice == 'y':
+            place_order(customer_id)
+        else:
+            return
+            
+    except:
+        print("invalid menu item id")
+
+#view order
+def view_order(customer_id):
     cursor.execute('''
-    insert into orders (customer_id, menu_item_id, quantity, table_number)
-    values (?, ?, ?, ?)
-    ''', (customer_id, menu_item_id, quantity, table_number))
-    cursor.execute('''
-    UPDATE users SET points = points + 10 WHERE id = ?
+    select o.id, m.item_name, o.quantity, o.table_number
+    from orders o
+    join menu m on o.menu_item_id = m.id
+    where o.customer_id = ?
     ''', (customer_id,))
-    conn.commit()
-    print("Order placed successfully")
+    orders = cursor.fetchall()
+
+    print("\nYour Orders:")
+    headers = ["id", "item_name", "quantity", "table_number"]
+    print(tabulate(orders, headers, tablefmt="grid"))
     
 #customer points view
 def view_points(customer_id):
@@ -299,7 +323,7 @@ def view_points(customer_id):
 #----------main--------------------------------------------------------------
 # main
 while True:
-    print("\nWelcome to the Restaurant Menu Management System")
+    print("\nWelcome to the Restaurant Menu Management System\n")
     print("1. user registration")
     print("2. login")
     print("0. Exit")
