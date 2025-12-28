@@ -22,7 +22,7 @@ cursor.execute('''
                id integer primary key autoincrement,
                customer_id integer not null,
                menu_item_id integer not null,
-               quantity integer not null,
+               quantity integer not null, 
                table_number integer not null,
                billed integer default 0,
                foreign key (customer_id) references users(id),
@@ -230,51 +230,6 @@ def view_orders():
 
 #-----------------------------------------------------------------------------------------------
 
-# cashier function
-def cashier():
-    while True:
-        print("\nCashier Menu")
-        print("1. View Menu")
-        print("2. View Orders")
-        print("3. Process Customer Payment")
-        print("0. Logout")
-
-        choice = input("enter your choice: ")
-        if choice == "1":
-            view_menu_available()
-        elif choice == "2":
-            view_orders()
-        elif choice == "3":
-            try:
-                cust_id = int(input("Enter customer id to process payment: "))
-                generate_bill(cust_id)
-            except ValueError:
-                print("invalid customer id")
-        elif choice == "0":
-            break
-        else:
-            print("invalid choice, please try again.")
-
-def waiter():
-    while True:
-        print("\nWaiter Menu")
-        print("1. Place Order for Customer")
-        print("2. View Orders")
-        print("0. Logout")
-
-        choice = input("enter your choice: ")
-        if choice == "1":
-            try:
-                cust_id = int(input("Enter customer id: "))
-                place_order(cust_id)
-            except ValueError:
-                print("invalid customer id")
-        elif choice == "2":
-            view_orders()
-        elif choice == "0":
-            break
-        else:
-            print("invalid choice, please try again.")
 
 #----------------------------------------------------------------------------------------------
 # customer function
@@ -286,6 +241,7 @@ def customer(customer_id):
         print("3. View Points")
         print("4. View order")
         print("5. view Bill")
+        print("6. Pay Bill")
         print("0. Logout")
 
         choice = input("\nenter your choice: ")
@@ -298,6 +254,10 @@ def customer(customer_id):
             view_points(customer_id)
         elif choice == "4":
             view_order(customer_id)
+        elif choice == "5":
+            generate_bill(customer_id)
+        elif choice == "6":
+            pay_bill(customer_id)
         elif choice == "0":
             break
         else:
@@ -382,6 +342,58 @@ def view_points(customer_id):
     else:
         print("Unable to fetch points")
 
+#genarte bill
+def generate_bill(customer_id):
+    cursor.execute('''
+    SELECT o.id, m.item_name, o.quantity, m.price,
+           (o.quantity * m.price) as total_price
+    FROM orders o
+    JOIN menu m ON o.menu_item_id = m.id
+    WHERE o.customer_id = ? AND o.billed = 0
+    ''', (customer_id,))
+    
+    orders = cursor.fetchall()
+    
+    if not orders:
+        print("No unbilled orders found for this customer.")
+        return None, None
+    
+    print("\n----- Bill Details -----")
+    headers = ["Order ID", "Item Name", "Quantity", "Unit Price", "Total Price"]
+    print(tabulate(orders, headers, tablefmt="grid"))
+    
+    total_amount = sum(order[4] for order in orders)
+    print(f"\nTotal Amount Due: ₹{total_amount:.2f}")
+    
+    order_ids = [order[0] for order in orders]
+    return total_amount, order_ids
+
+def pay_bill(customer_id):
+    total_amount, order_ids = generate_bill(customer_id)
+
+    if not order_ids:
+        return
+
+    choice = input("\nDo you want to pay the bill? (y/n): ").lower()
+    if choice != 'y':
+        print("Payment not completed.")
+        return
+
+    payment_mode = input("Enter payment mode (Cash / Card / UPI): ").strip().lower()
+
+    if payment_mode not in ["cash", "card", "upi"]:
+        print("Invalid payment mode.")
+        return
+
+    cursor.execute(f'''
+    UPDATE orders
+    SET billed = 1
+    WHERE id IN ({','.join('?' for _ in order_ids)})
+    ''', order_ids)
+
+    conn.commit()
+    print(f"Payment successful via {payment_mode}.")
+    print("Orders marked as billed.")
 
 
 
