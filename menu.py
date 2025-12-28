@@ -124,7 +124,7 @@ def add_staff():
 #view staff function
 def view_staff():
     cursor.execute('''
-    select id, username, phone, role from users where role in ('chef', 'waiter', 'cashier')
+    select id, username, phone, role from users where role in ('chef', 'waiter')
     ''' )
     staff_members = cursor.fetchall()
 
