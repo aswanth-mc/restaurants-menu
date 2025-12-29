@@ -31,6 +31,8 @@ cursor.execute('''
                 
                ''')
 
+
+
 #menu table
 cursor.execute('''
 create table if not exists menu (
@@ -409,6 +411,7 @@ def generate_bill(customer_id):
     order_ids = [order[0] for order in orders]
     return total_amount, order_ids
 
+# pay bill function
 def pay_bill(customer_id):
     total_amount, order_ids = generate_bill(customer_id)
 
