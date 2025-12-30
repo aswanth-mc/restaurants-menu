@@ -86,6 +86,7 @@ def login():
             chef(id)
         elif role == 'waiter':
             print(f"\nwelcome waiter {username}")
+            waiter(id)
         else:
             print(f"\nwelcome {username}")
             customer(id)
@@ -313,6 +314,64 @@ def chef_marks_order_ready(chef_id):
             print("order marked as ready successfully")
     except:
         print("failed to mark order as ready")
+
+
+
+
+
+# waiter function
+def waiter(waiter_id):
+        while True:
+            print("\nWaiter Menu")
+            print("1. View Ready Orders")
+            print("2. Serve Order")
+            print("0. Logout")
+
+            choice = input("enter your choice: ")
+
+            if choice == "1":
+                view_ready_orders()
+            elif choice == "2":
+                serve_order(waiter_id)
+            elif choice == "0":
+                break
+            else:
+                print("invalid choice")
+
+# view ready orders
+def view_ready_orders():
+    cursor.execute('''
+    select o.id, u.username, m.item_name, o.quantity, o.table_number
+    from orders o
+    join users u ON o.customer_id = u.id
+    join menu m ON o.menu_item_id = m.id
+    where o.status = 'cooked' and o.billed = 0
+    ''')
+    orders = cursor.fetchall()
+
+    if not orders:
+        print("No ready orders available.")
+        return
+    
+    headers = ["Order ID", "Customer Name", "Item Name", "Quantity", "Table Number"]
+    print(tabulate(orders, headers, tablefmt="grid"))
+
+# serve order
+def serve_order(waiter_id):
+    try:
+        order_id = int(input("enter order id to serve: "))
+        cursor.execute('''
+        update orders set status = 'served' where id = ? and status = 'cooked'
+        ''', (order_id,))
+        if cursor.rowcount == 0:
+            print("order not found or not ready to serve.")
+        else:
+            conn.commit()
+            print("order served successfully")
+    except:
+        print("failed to serve order")
+
+
 
 
 
