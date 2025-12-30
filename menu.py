@@ -65,6 +65,8 @@ INSERT OR IGNORE INTO users (username, password, phone, role)
 values ('manager1', 'man123', '1111111111', 'manager')
 ''')
 
+
+
 # login function
 def login():
     phone = input ("enter phone number: ")
@@ -89,6 +91,8 @@ def login():
             customer(id)
     else:
         print("invalid phone number or password")
+
+
 
 
 # manager function
@@ -185,7 +189,7 @@ def view_feedback():
 
 
 
-#-----------------------------------------------------------------------------------------------   
+
 
 # chef function
 def chef(chef_id):
@@ -234,6 +238,7 @@ def add_menu():
         if choice != 'y':
             break
 
+#view menu function
 def view_menu_available():
     cursor.execute('''
     select id, item_name, category, price, availability from menu''')
@@ -308,10 +313,10 @@ def chef_marks_order_ready(chef_id):
             print("order marked as ready successfully")
     except:
         print("failed to mark order as ready")
-#-----------------------------------------------------------------------------------------------
 
 
-#----------------------------------------------------------------------------------------------
+
+
 # customer function
 def customer(customer_id):
     while True:
@@ -503,7 +508,8 @@ def add_feedback(customer_id):
 
 
 
-#----------main--------------------------------------------------------------
+
+
 # main
 while True:
     print("\nWelcome to the Restaurant Menu Management System\n")
