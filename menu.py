@@ -26,11 +26,12 @@ cursor.execute('''
                quantity integer not null, 
                table_number integer not null,
                billed integer default 0,
+               status text default 'pending',
+               chef_id integer,
                foreign key (customer_id) references users(id),
                foreign key (menu_item_id) references menu(id))
                 
                ''')
-
 
 
 #menu table
@@ -80,7 +81,7 @@ def login():
             manager()
         elif role == 'chef':
             print(f"\nwelcome chef {username}")
-            chef()
+            chef(id)
         elif role == 'waiter':
             print(f"\nwelcome waiter {username}")
         else:
@@ -187,16 +188,18 @@ def view_feedback():
 #-----------------------------------------------------------------------------------------------   
 
 # chef function
-def chef():
+def chef(chef_id):
     while True:
         print("\nChef Menu")
         print("1.add menu item")
         print("2.view menu")
         print("3.view orders")
-        print("4.update menu")
+        print("4.accept order")
+        print("5.mark order as ready")
+        print("6.update menu")
         print("0.logout")
 
-        choice = input("enter your choice: ")
+        choice = input("\nenter your choice: ")
         if choice == "1":
             add_menu()
         elif choice == "2":
@@ -204,6 +207,10 @@ def chef():
         elif choice == "3":
             view_orders()
         elif choice == "4":
+            chef_accepts_order(chef_id)
+        elif choice == "5":
+            chef_marks_order_ready(chef_id)
+        elif choice == "6":
             update_menu_item_availbility()
         elif choice == "0":
             break
@@ -258,16 +265,49 @@ def view_orders():
     cursor.execute('''
     select o.id, u.username, m.item_name, o.quantity, o.table_number
     from orders o
-    join users u on o.customer_id = u.id
-    join menu m on o.menu_item_id = m.id
+    join users u ON o.customer_id = u.id
+    join menu m ON o.menu_item_id = m.id
+    where o.status = 'pending' AND o.chef_id IS NULL and o.billed = 0
     ''')
     orders = cursor.fetchall()
 
-    print("\nOrders:")
-    headers = ["id", "username", "item_name", "quantity", "table_number"]
+    if not orders:
+        print("No pending orders available.")
+        return
+    
+    headers = ["Order ID", "Customer Name", "Item Name", "Quantity", "Table Number"]
     print(tabulate(orders, headers, tablefmt="grid"))
 
 
+# chef accepts
+def chef_accepts_order(chef_id):
+    try:
+        order_id = int(input("enter order id to accept: "))
+        cursor.execute('''
+        update orders set chef_id = ?, status = 'cooking' where id = ? and chef_id IS NULL
+        ''', (chef_id, order_id))
+        if cursor.rowcount == 0:
+            print("order not found or already accepted by another chef.")
+        else:
+            conn.commit()
+            print("order accepted successfully")
+    except:
+        print("failed to accept order")
+
+#chef marks order as ready
+def chef_marks_order_ready(chef_id):
+    try:
+        order_id = int(input("enter order id to mark as ready: "))
+        cursor.execute('''
+        update orders set status = 'cooked' where id = ? and chef_id = ?
+        ''', (order_id, chef_id))
+        if cursor.rowcount == 0:
+            print("order not found or not assigned to you.")
+        else:
+            conn.commit()
+            print("order marked as ready successfully")
+    except:
+        print("failed to mark order as ready")
 #-----------------------------------------------------------------------------------------------
 
 
@@ -282,7 +322,7 @@ def customer(customer_id):
         print("4. View order")
         print("5. view Bill")
         print("6. Pay Bill")
-        Print("7. Add Feedback")
+        print("7. Add Feedback")
         print("0. Logout")
 
         choice = input("\nenter your choice: ")
@@ -361,7 +401,7 @@ def place_order(customer_id):
 #view order
 def view_order(customer_id):
     cursor.execute('''
-    select o.id, m.item_name, o.quantity, o.table_number
+    select o.id, m.item_name, o.quantity, o.table_number, o.status
     from orders o
     join menu m on o.menu_item_id = m.id
     where o.customer_id = ?
@@ -369,7 +409,7 @@ def view_order(customer_id):
     orders = cursor.fetchall()
 
     print("\nYour Orders:")
-    headers = ["id", "item_name", "quantity", "table_number"]
+    headers = ["id", "item_name", "quantity", "table_number","status"]
     print(tabulate(orders, headers, tablefmt="grid"))
     
 #customer points view
