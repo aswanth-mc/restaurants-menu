@@ -461,14 +461,29 @@ def customer_registration():
 
 # view menu 
 def view_menu():
-    cursor.execute('''
-    select id, item_name, category, price from menu''')
-    menu_items = cursor.fetchall()
+    cursor.execute("SELECT id, category_name FROM categories ORDER BY id")
+    categories = cursor.fetchall()
+    if not categories:
+        print("No categories available.")
+        return
+    print("\n======= RESTAURANT MENU =======")
+    for category_id, category_name in categories:
+        cursor.execute('''
+                       select item_name, price, is_veg 
+                       from menu where id = ?''', (category_id,))
+        items = cursor.fetchall()
+        if not items:
+            continue
+        print(f"\n--- {category_name} ---")
+        formatted_items = []
+        for item in items:
+            veg_status = "Veg" if item[2] == 1 else "Non-Veg"
+            formatted_items.append(
+                (item[0],  f"₹{item[1]:.2f}", veg_status)
+            )
 
-    print("\nMenu Items:")
-    headers = ["id", "item_name", "category", "price"]
-    print(tabulate(menu_items, headers, tablefmt="grid"))
-
+        headers = ["Item Name", "price",  "Type"]
+        print(tabulate(formatted_items, headers, tablefmt="grid"))
 # order placeing
 def place_order(customer_id):
 
