@@ -89,9 +89,9 @@ def login():
         if role == 'manager':
             print(f"\nwelcome manager {username}")
             manager()
-        elif role == 'chef':
-            print(f"\nwelcome chef {username}")
-            chef(id)
+        elif role == 'chief':
+            print(f"\nwelcome chief {username}")
+            chief(id)
         elif role == 'waiter':
             print(f"\nwelcome waiter {username}")
             waiter(id)
@@ -138,10 +138,10 @@ def add_staff():
         username = input("enter staff username: ").strip()
         password = input("enter staff password: ").strip()
         phone = input("enter staff phone number: ").strip()
-        role = input("enter staff role (chef/waiter): ").strip().lower()
+        role = input("enter staff role (chief/waiter): ").strip().lower()
 
-        if role not in ['chef', 'waiter']:
-            print("invalid role, must be 'chef' or 'waiter'")
+        if role not in ['chief', 'waiter']:
+            print("invalid role, must be 'chief' or 'waiter'")
             return
         if not username or not password or not phone:
             print("all fields are required")
@@ -158,7 +158,7 @@ def add_staff():
 #view staff function
 def view_staff():
     cursor.execute('''
-    select id, username, phone, role from users where role in ('chef', 'waiter')
+    select id, username, phone, role from users where role in ('chief', 'waiter')
     ''' )
     staff_members = cursor.fetchall()
 
@@ -200,10 +200,10 @@ def view_feedback():
 
 
 
-# chef function
-def chef(chef_id):
+# chief function
+def chief(chief_id):
     while True:
-        print("\nChef Menu")
+        print("\nChief Menu\n")
         print("1.add menu item")
         print("2.view menu")
         print("3.view orders")
@@ -237,13 +237,13 @@ def chef(chef_id):
 def add_menu():
     while True:
         item_name = input("enter item name: ")
-        category = input("enter category: ")
+        category_id = input("enter category id: ")
         price = float(input("enter price: "))
         is_veg = int(input("enter is_veg (1 for veg, 0 for non-veg): "))
         availability = int(input("enter availability (1 for available, 0 for not available): "))
         cursor.execute('''
-        insert into menu (item_name, category, price, is_veg, availability)
-        values (?, ?, ?, ?, ?)''', (item_name, category, price, is_veg, availability))
+        insert into menu (item_name, category_id, price, is_veg, availability)
+        values (?, ?, ?, ?, ?)''', (item_name, category_id, price, is_veg, availability))
         conn.commit()
         print("menu item added successfully")
 
