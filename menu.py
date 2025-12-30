@@ -36,12 +36,20 @@ cursor.execute('''
 
 #menu table
 cursor.execute('''
-create table if not exists menu (
+               create table if not exists menu(
                id integer primary key autoincrement,
                item_name text not null,
-               category text not null,
+               category_id integer not null,
                price real not null,
-               availability integer default 1)
+               is_veg integer default 1,
+               availability integer default 1,
+               foreign key (category_id) references categories(id))
+               ''')
+#category table
+cursor.execute('''
+               create table if not exists categories(
+               id integer primary key autoincrement,
+               category_name text unique not null)
                ''')
 
 #customer feedback
@@ -202,6 +210,7 @@ def chef(chef_id):
         print("4.accept order")
         print("5.mark order as ready")
         print("6.update menu")
+        print("7.add category")
         print("0.logout")
 
         choice = input("\nenter your choice: ")
@@ -217,6 +226,8 @@ def chef(chef_id):
             chef_marks_order_ready(chef_id)
         elif choice == "6":
             update_menu_item_availbility()
+        elif choice == "7":
+            add_category()
         elif choice == "0":
             break
         else:
@@ -228,10 +239,11 @@ def add_menu():
         item_name = input("enter item name: ")
         category = input("enter category: ")
         price = float(input("enter price: "))
+        is_veg = int(input("enter is_veg (1 for veg, 0 for non-veg): "))
         availability = int(input("enter availability (1 for available, 0 for not available): "))
         cursor.execute('''
-        insert into menu (item_name, category, price, availability)
-        values (?, ?, ?, ?)''', (item_name, category, price, availability))
+        insert into menu (item_name, category, price, is_veg, availability)
+        values (?, ?, ?, ?, ?)''', (item_name, category, price, is_veg, availability))
         conn.commit()
         print("menu item added successfully")
 
@@ -314,6 +326,27 @@ def chef_marks_order_ready(chef_id):
             print("order marked as ready successfully")
     except:
         print("failed to mark order as ready")
+
+#add category function
+def add_category():
+    while True:
+        try:
+            category_name = input("\nenter category name: ").strip()
+            if not category_name:
+                print("category name cannot be empty")
+                return
+            cursor.execute('''
+            insert into categories (category_name)
+            values (?)''', (category_name,))
+            conn.commit()
+            print("category added successfully")
+        except:
+            print("failed to add category")
+    
+        choice = input("do you want to add another category? (y/n): ").lower()
+        if choice != 'y':
+            print("category added successfully.")
+            break
 
 
 
@@ -517,6 +550,23 @@ def generate_bill(customer_id):
 
 # pay bill function
 def pay_bill(customer_id):
+    total_amount, order_ids = generate_bill(customer_id)
+
+    cursor.execute('''
+    SELECT COUNT(*)
+    FROM orders
+    WHERE customer_id = ?
+      AND billed = 0
+      AND status != 'served'
+    ''', (customer_id,))
+
+    unserved_count = cursor.fetchone()[0]
+
+    if unserved_count > 0:
+        print(" Payment not allowed.")
+        print("Some orders are not yet served.")
+        return
+
     total_amount, order_ids = generate_bill(customer_id)
 
     if not order_ids:
