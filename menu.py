@@ -298,12 +298,12 @@ def view_orders():
 
 
 # chef accepts
-def chef_accepts_order(chef_id):
+def chef_accepts_order(chief_id):
     try:
         order_id = int(input("enter order id to accept: "))
         cursor.execute('''
         update orders set chef_id = ?, status = 'cooking' where id = ? and chef_id IS NULL
-        ''', (chef_id, order_id))
+        ''', (chief_id, order_id))
         if cursor.rowcount == 0:
             print("order not found or already accepted by another chef.")
         else:
@@ -313,12 +313,12 @@ def chef_accepts_order(chef_id):
         print("failed to accept order")
 
 #chef marks order as ready
-def chef_marks_order_ready(chef_id):
+def chef_marks_order_ready(chief_id):
     try:
         order_id = int(input("enter order id to mark as ready: "))
         cursor.execute('''
         update orders set status = 'cooked' where id = ? and chef_id = ?
-        ''', (order_id, chef_id))
+        ''', (order_id, chief_id))
         if cursor.rowcount == 0:
             print("order not found or not assigned to you.")
         else:
@@ -469,8 +469,8 @@ def view_menu():
     print("\n======= RESTAURANT MENU =======")
     for category_id, category_name in categories:
         cursor.execute('''
-                       select item_name, price, is_veg 
-                       from menu where id = ?''', (category_id,))
+                       select id,item_name, price, is_veg 
+                       from menu where category_id = ?''', (category_id,))
         items = cursor.fetchall()
         if not items:
             continue
@@ -479,10 +479,10 @@ def view_menu():
         for item in items:
             veg_status = "Veg" if item[2] == 1 else "Non-Veg"
             formatted_items.append(
-                (item[0],  f"₹{item[1]:.2f}", veg_status)
+                (item[0], item[1], f"₹{item[2]:.2f}", veg_status)
             )
 
-        headers = ["Item Name", "price",  "Type"]
+        headers = ["Item ID", "Item Name", "price",  "Type"]
         print(tabulate(formatted_items, headers, tablefmt="grid"))
 # order placeing
 def place_order(customer_id):
@@ -587,6 +587,24 @@ def pay_bill(customer_id):
     if not order_ids:
         return
 
+    cursor.execute(''' select points from users where id = ?''', (customer_id,))
+    points = cursor.fetchone()[0]
+
+    discount = 0
+    points_used = 0
+    if points >= 100:
+        choice = input("do you want to redeem your points for discount? (y/n): ").lower()
+        if choice == 'y':
+            discount, points_used = calculate_redeemable_points(points)
+            discount = min(discount, total_amount)
+
+    final_amount = total_amount - discount
+
+    print(f"\nTotal Bill     : ₹{total_amount:.2f}")
+    print(f"Points Used   : {points_used}")
+    print(f"Discount      : ₹{discount:.2f}")
+    print(f"Final Payable : ₹{final_amount:.2f}")
+
     choice = input("\nDo you want to pay the bill? (y/n): ").lower()
     if choice != 'y':
         print("Payment not completed.")
@@ -604,9 +622,22 @@ def pay_bill(customer_id):
     WHERE id IN ({','.join('?' for _ in order_ids)})
     ''', order_ids)
 
+    if points_used > 0:
+        cursor.execute('''
+        UPDATE users
+        SET points = points - ?
+        WHERE id = ?
+        ''', (points_used, customer_id))
+
     conn.commit()
     print(f"Payment successful via {payment_mode}.")
     print("Orders marked as billed.")
+
+# point_redeem function
+def calculate_redeemable_points(points):
+    redeemable_points = points // 100
+    discount = redeemable_points * 10
+    return redeemable_points*100, discount
 
 # feedback function
 def add_feedback(customer_id):
