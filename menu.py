@@ -221,9 +221,9 @@ def chief(chief_id):
         elif choice == "3":
             view_orders()
         elif choice == "4":
-            chef_accepts_order(chef_id)
+            chef_accepts_order(chief_id)
         elif choice == "5":
-            chef_marks_order_ready(chef_id)
+            chef_marks_order_ready(chief_id)
         elif choice == "6":
             update_menu_item_availbility()
         elif choice == "7":
@@ -568,9 +568,9 @@ def pay_bill(customer_id):
     total_amount, order_ids = generate_bill(customer_id)
 
     cursor.execute('''
-    SELECT COUNT(*)
-    FROM orders
-    WHERE customer_id = ?
+    select COUNT(*)
+    from orders
+    where customer_id = ?
       AND billed = 0
       AND status != 'served'
     ''', (customer_id,))
