@@ -10,7 +10,7 @@ A **terminal-based Restaurant Management System** built using **Python** and **S
 - View full menu
 - Add staff (Chef / Waiter)
 - View staff details
-- View customers
+- View customers and it's points
 - View customer feedback
 
 ### 👨‍🍳 Chef
